@@ -71,7 +71,9 @@ jobs:
         7z a Qt_${{env.QT_VERSION}}-${{env.FILE_NAME}}.7z ../Qt/${{env.QT_VERSION}}-static -mx=9
 
     # 上传
-    - uses: actions/upload-artifact@v4
+    - uses: softprops/action-gh-release@v2
       with:
-        name: Qt_${{env.QT_VERSION}}-${{env.FILE_NAME}}
-        path: Qt_${{env.QT_VERSION}}-${{env.FILE_NAME}}.7z
+        tag_name: ${{env.QT_VERSION}}
+        token: ${{secrets.GITHUB_TOKEN}}
+        generate_release_notes: false
+        files: ${{runner.workspace}}/buildQt/Qt_${{env.QT_VERSION}}-${{env.FILE_NAME}}.7z
