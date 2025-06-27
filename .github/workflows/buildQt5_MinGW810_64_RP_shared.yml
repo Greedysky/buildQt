@@ -68,7 +68,7 @@ jobs:
         unzip -q qtsvg-everywhere-opensource-src.zip -d ./${{env.QT_VERSION}}
 
         # 调用编译脚本
-        cmd.exe /c "call `"D:\a\buildQt\buildQt\build-shared-Qt5mingw810_64_RP`""
+        cmd.exe /c "call `"D:\a\buildQt\buildQt\build-shared-Qt5mingw810_64_RP.cmd`""
 
     # 打包
     - name: Package binaries
