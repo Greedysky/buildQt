@@ -1,4 +1,4 @@
-name: build_Qt5.15.19_MinGW810_32_shared
+name: build_Qt5_MinGW810_32_shared
 
 on: workflow_dispatch
 #on: [push, pull_request]
