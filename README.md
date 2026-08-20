@@ -22,6 +22,7 @@
 
 ## Qt5.15 编译器
 **mingw810_32**：[8.1.0-1-202411201005mingw810_32.7z](https://download.qt.io/online/qtsdkrepository/windows_x86/desktop/tools_mingw81/qt.tools.win32_mingw810/8.1.0-1-202411201005i686-8.1.0-gdb-11.2.0-release-posix-dwarf-rt_v6-rev0.7z) (Qt官方默认编译器版本)
+
 **mingw810_64**：[8.1.0-1-202411201005mingw810_64.7z](https://download.qt.io/online/qtsdkrepository/windows_x86/desktop/tools_mingw81/qt.tools.win64_mingw810/8.1.0-1-202411201005x86_64-8.1.0-gdb-11.2.0-release-posix-seh-rt_v6-rev0.7z) (Qt官方默认编译器版本)
 
 ## Qt6.2 编译器
