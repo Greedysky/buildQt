@@ -65,13 +65,13 @@ jobs:
         mkdir -p ${{env.QT_VERSION}}-static
 
         # 下载源代码并解压，源代码目录D:\a\buildQt\Qt\${{env.QT_VERSION}}\XXX
-        curl -L -o qtbase-everywhere-opensource-src.zip https://download.qt.io/archive/qt/${{env.QT_VERSION2}}/${{env.QT_VERSION}}/submodules/qtbase-everywhere-opensource-src-${{env.QT_VERSION}}.zip
+        curl -L -o qtbase-everywhere-opensource-src.zip https://download.qt.io/archive/qt/${{env.QT_VERSION2}}/${{env.QT_VERSION}}/src/submodules/qtbase-everywhere-opensource-src-${{env.QT_VERSION}}.zip
         unzip -q qtbase-everywhere-opensource-src.zip -d ./${{env.QT_VERSION}}
-        curl -L -o qttools-everywhere-opensource-src.zip https://download.qt.io/archive/qt/${{env.QT_VERSION2}}/${{env.QT_VERSION}}/submodules/qttools-everywhere-opensource-src-${{env.QT_VERSION}}.zip
+        curl -L -o qttools-everywhere-opensource-src.zip https://download.qt.io/archive/qt/${{env.QT_VERSION2}}/${{env.QT_VERSION}}/src/submodules/qttools-everywhere-opensource-src-${{env.QT_VERSION}}.zip
         unzip -q qttools-everywhere-opensource-src.zip -d ./${{env.QT_VERSION}}
-        curl -L -o qttranslations-everywhere-opensource-src.zip https://download.qt.io/archive/qt/${{env.QT_VERSION2}}/${{env.QT_VERSION}}/submodules/qttranslations-everywhere-opensource-src-${{env.QT_VERSION}}.zip
+        curl -L -o qttranslations-everywhere-opensource-src.zip https://download.qt.io/archive/qt/${{env.QT_VERSION2}}/${{env.QT_VERSION}}/src/submodules/qttranslations-everywhere-opensource-src-${{env.QT_VERSION}}.zip
         unzip -q qttranslations-everywhere-opensource-src.zip -d ./${{env.QT_VERSION}}
-        curl -L -o qtsvg-everywhere-opensource-src.zip https://download.qt.io/archive/qt/${{env.QT_VERSION2}}/${{env.QT_VERSION}}/submodules/qtsvg-everywhere-opensource-src-${{env.QT_VERSION}}.zip
+        curl -L -o qtsvg-everywhere-opensource-src.zip https://download.qt.io/archive/qt/${{env.QT_VERSION2}}/${{env.QT_VERSION}}/src/submodules/qtsvg-everywhere-opensource-src-${{env.QT_VERSION}}.zip
         unzip -q qtsvg-everywhere-opensource-src.zip -d ./${{env.QT_VERSION}}
 
         # 调用编译脚本
