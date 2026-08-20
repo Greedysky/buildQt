@@ -5,11 +5,11 @@ on: workflow_dispatch
 
 env:
   QT_VERSION: 6.8.4
-  QT_VERSION2: 6.8
+  QT_VERSION_MAIN: 6.8
   FILE_NAME: static-release_mingw1310_64_RP
 
 jobs:
-  windows_mingw64_static_release:
+  build:
     runs-on: windows-latest
 
     steps:
@@ -65,17 +65,17 @@ jobs:
         mkdir -p ${{env.QT_VERSION}}-static
 
         # 下载源代码并解压，源代码目录D:\a\buildQt\Qt\${{env.QT_VERSION}}\XXX
-        curl -L -o qtbase-everywhere-opensource-src.zip https://download.qt.io/archive/qt/${{env.QT_VERSION2}}/${{env.QT_VERSION}}/submodules/qtbase-everywhere-opensource-src-${{env.QT_VERSION}}.zip
+        curl -L -o qtbase-everywhere-opensource-src.zip https://download.qt.io/archive/qt/${{env.QT_VERSION_MAIN}}/${{env.QT_VERSION}}/submodules/qtbase-everywhere-opensource-src-${{env.QT_VERSION}}.zip
         unzip -q qtbase-everywhere-opensource-src.zip -d ./${{env.QT_VERSION}}
-        curl -L -o qttools-everywhere-opensource-src.zip https://download.qt.io/archive/qt/${{env.QT_VERSION2}}/${{env.QT_VERSION}}/submodules/qttools-everywhere-opensource-src-${{env.QT_VERSION}}.zip
+        curl -L -o qttools-everywhere-opensource-src.zip https://download.qt.io/archive/qt/${{env.QT_VERSION_MAIN}}/${{env.QT_VERSION}}/submodules/qttools-everywhere-opensource-src-${{env.QT_VERSION}}.zip
         unzip -q qttools-everywhere-opensource-src.zip -d ./${{env.QT_VERSION}}
-        curl -L -o qttranslations-everywhere-opensource-src.zip https://download.qt.io/archive/qt/${{env.QT_VERSION2}}/${{env.QT_VERSION}}/submodules/qttranslations-everywhere-opensource-src-${{env.QT_VERSION}}.zip
+        curl -L -o qttranslations-everywhere-opensource-src.zip https://download.qt.io/archive/qt/${{env.QT_VERSION_MAIN}}/${{env.QT_VERSION}}/submodules/qttranslations-everywhere-opensource-src-${{env.QT_VERSION}}.zip
         unzip -q qttranslations-everywhere-opensource-src.zip -d ./${{env.QT_VERSION}}
-        curl -L -o qtsvg-everywhere-opensource-src.zip https://download.qt.io/archive/qt/${{env.QT_VERSION2}}/${{env.QT_VERSION}}/submodules/qtsvg-everywhere-opensource-src-${{env.QT_VERSION}}.zip
+        curl -L -o qtsvg-everywhere-opensource-src.zip https://download.qt.io/archive/qt/${{env.QT_VERSION_MAIN}}/${{env.QT_VERSION}}/submodules/qtsvg-everywhere-opensource-src-${{env.QT_VERSION}}.zip
         unzip -q qtsvg-everywhere-opensource-src.zip -d ./${{env.QT_VERSION}}
 
         # 调用编译脚本
-        cmd.exe /c "call `"D:\a\buildQt\buildQt\6.8\build_static_Qt6_MinGW1310_64_RP.cmd`""
+        cmd.exe /c "call `"D:\a\buildQt\buildQt\${{env.QT_VERSION_MAIN}}\build_static_Qt6_MinGW1310_64_RP.cmd`""
 
     # 打包
     - name: Package binaries
