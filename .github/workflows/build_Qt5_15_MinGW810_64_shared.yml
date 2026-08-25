@@ -68,6 +68,9 @@ jobs:
     - name: Package binaries
       run: |
         #ls     #Directory: D:\a\buildQt\buildQt(即仓库目录)
+        cp D:\a\buildQt\mingw64\bin\libstdc++-6.dll ../Qt/${{env.QT_VERSION}}-shared/mingw810_64/bin
+        cp D:\a\buildQt\mingw64\bin\libgcc_s_seh-1.dll ../Qt/${{env.QT_VERSION}}-shared/mingw810_64/bin
+        cp D:\a\buildQt\mingw64\bin\libwinpthread-1.dll ../Qt/${{env.QT_VERSION}}-shared/mingw810_64/bin
         7z a Qt_${{env.QT_VERSION}}-${{env.FILE_NAME}}.7z ../Qt/${{env.QT_VERSION}}-shared -mx=9
 
     # 发布
