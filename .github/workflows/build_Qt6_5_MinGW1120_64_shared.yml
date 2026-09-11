@@ -4,7 +4,7 @@ on: workflow_dispatch
 #on: [push, pull_request]
 
 env:
-  QT_VERSION: 6.5.9
+  QT_VERSION: 6.5.10
   QT_VERSION_MAIN: 6.5
   FILE_NAME: shared-release_mingw1120_64
 
