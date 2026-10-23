@@ -2,7 +2,7 @@
 @cd /d %~dp0
 
 :: 设置Qt版本
-SET QT_VERSION=6.8.4
+SET QT_VERSION=6.8.5
 
 :: 设置MinGW版本代号
 SET MinGW_VERSION=mingw1310_64

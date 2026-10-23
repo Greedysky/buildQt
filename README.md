@@ -18,8 +18,8 @@
 6. Qt6.2.13 MinGW1120_64_RP  (使用Qt官方默认编译器版本)
 7. Qt6.5.10 MinGW1120_64     (使用Qt官方默认编译器版本)
 8. Qt6.5.10 MinGW1120_64_RP  (使用Qt官方默认编译器版本)
-9. Qt6.8.4 MinGW1310_64     (使用Qt官方默认编译器版本)
-10. Qt6.8.4 MinGW1310_64_RP  (使用Qt官方默认编译器版本)
+9. Qt6.8.5 MinGW1310_64     (使用Qt官方默认编译器版本)
+10. Qt6.8.5 MinGW1310_64_RP  (使用Qt官方默认编译器版本)
 
 ## Qt5.15 编译器
 **mingw810_32**：[8.1.0-1-202411201005mingw810_32.7z](https://download.qt.io/online/qtsdkrepository/windows_x86/desktop/tools_mingw81/qt.tools.win32_mingw810/8.1.0-1-202411201005i686-8.1.0-gdb-11.2.0-release-posix-dwarf-rt_v6-rev0.7z) (Qt官方默认编译器版本)
