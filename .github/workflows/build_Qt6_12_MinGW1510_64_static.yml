@@ -36,7 +36,7 @@ jobs:
       run: |
         cd ..  #Directory: D:\a\buildQt
         curl -L -o mingw1510.7z https://download.qt.io/online/qtsdkrepository/windows_x86/desktop/tools_mingw1510/qt.tools.win64_mingw1510/15.1.0-202610271023mingw1510.7z
-        7z x D:\a\buildQt\mingw1510.7z -oD:\a\buildQt
+        7z x D:\a\buildQt\mingw1510.7z -oD:\a\buildQt\Tools\mingw1510_64
 
     # 安装 Ninja
     - name: Setup Ninja

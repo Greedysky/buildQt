@@ -9,6 +9,8 @@ SET MinGW_VERSION=mingw1510_64_RP
 
 :: 设置编译器、Ninja、Perl
 SET PATH=D:\a\buildQt\Tools\mingw1510_64\bin;D:\a\buildQt\ninja;D:\a\buildQt\Strawberry\c\bin;D:\a\buildQt\Strawberry\perl\site\bin;D:\a\buildQt\Strawberry\perl\bin;%PATH%
+SET CC=D:\a\buildQt\Tools\mingw1510_64\bin\gcc.exe
+SET CXX=D:\a\buildQt\Tools\mingw1510_64\bin\g++.exe
 
 :: 设置Qt文件夹路径
 SET QT_PATH=D:\a\buildQt\Qt

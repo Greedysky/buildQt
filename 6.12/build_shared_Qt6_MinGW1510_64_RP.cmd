@@ -9,6 +9,8 @@ SET MinGW_VERSION=mingw1510_64_RP
 
 :: 设置编译器、Ninja、Perl
 SET PATH=D:\a\buildQt\Tools\mingw1510_64\bin;D:\a\buildQt\ninja;D:\a\buildQt\Strawberry\c\bin;D:\a\buildQt\Strawberry\perl\site\bin;D:\a\buildQt\Strawberry\perl\bin;%PATH%
+SET CC=D:\a\buildQt\Tools\mingw1510_64\bin\gcc.exe
+SET CXX=D:\a\buildQt\Tools\mingw1510_64\bin\g++.exe
 
 :: 设置Qt文件夹路径
 SET QT_PATH=D:\a\buildQt\Qt
@@ -35,37 +37,37 @@ mkdir "%BUILD_DIR%" && cd /d "%BUILD_DIR%"
 ::编译qtbase
 mkdir build-qtbase
 cd build-qtbase
-call %SRC_qtbase%\configure.bat -shared -release -nomake examples -prefix %INSTALL_DIR% -opensource -confirm-license -qt-libpng -qt-libjpeg -qt-zlib -qt-pcre -qt-freetype -schannel -opengl desktop -platform win32-g++
-cmake --build . --parallel
-ninja install
+call %SRC_qtbase%\configure.bat -shared -release -nomake examples -prefix %INSTALL_DIR% -opensource -confirm-license -qt-libpng -qt-libjpeg -qt-zlib -qt-pcre -qt-freetype -schannel -opengl desktop -platform win32-g++ || exit /b 1
+cmake --build . --parallel || exit /b 1
+ninja install || exit /b 1
 cd ..
 
 ::编译qttools
 mkdir build-qttools
 cd build-qttools
-cmake %SRC_qttools% -G "Ninja" -DCMAKE_INSTALL_PREFIX=%INSTALL_DIR% -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=%INSTALL_DIR%
-cmake --build . --parallel
-ninja install
+cmake %SRC_qttools% -G "Ninja" -DCMAKE_INSTALL_PREFIX=%INSTALL_DIR% -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=%INSTALL_DIR% || exit /b 1
+cmake --build . --parallel || exit /b 1
+ninja install || exit /b 1
 cd ..
 
 ::编译qttranslations
 mkdir build-qttranslations
 cd build-qttranslations
-cmake %SRC_qttranslations% -G "Ninja" -DCMAKE_INSTALL_PREFIX=%INSTALL_DIR% -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=%INSTALL_DIR%
-cmake --build . --parallel
-ninja install
+cmake %SRC_qttranslations% -G "Ninja" -DCMAKE_INSTALL_PREFIX=%INSTALL_DIR% -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=%INSTALL_DIR% || exit /b 1
+cmake --build . --parallel || exit /b 1
+ninja install || exit /b 1
 cd ..
 
 ::编译qtsvg
 mkdir build-qtsvg
 cd build-qtsvg
-cmake %SRC_qtsvg% -G "Ninja" -DCMAKE_INSTALL_PREFIX=%INSTALL_DIR% -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=%INSTALL_DIR%
-cmake --build . --parallel
-ninja install
+cmake %SRC_qtsvg% -G "Ninja" -DCMAKE_INSTALL_PREFIX=%INSTALL_DIR% -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=%INSTALL_DIR% || exit /b 1
+cmake --build . --parallel || exit /b 1
+ninja install || exit /b 1
 cd ..
 
 ::复制qt.conf
-copy %~dp0\qt.conf %INSTALL_DIR%\bin
+copy "%~dp0..\qt.conf" %INSTALL_DIR%\bin || exit /b 1
 
 ::@pause
-@cmd /k cd /d %INSTALL_DIR%
+@exit /b 0
