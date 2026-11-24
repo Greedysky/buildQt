@@ -1,0 +1,191 @@
+name: Build Qt
+description: Download dependencies and sources, build Qt, package, and publish the archive.
+
+inputs:
+  qt-version:
+    description: Full Qt version.
+    required: true
+  qt-major:
+    description: Qt major version.
+    required: true
+  build-type:
+    description: shared or static.
+    required: true
+  flavor:
+    description: full or rp.
+    required: true
+  script-path:
+    description: Repository-relative path to the build script.
+    required: true
+  full-source-url:
+    description: Full-source archive URL.
+    required: true
+  module-source-url-template:
+    description: Module archive URL template containing {module}.
+    required: true
+  mingw-url:
+    description: MinGW archive URL.
+    required: true
+  mingw-path:
+    description: MinGW path relative to the build root.
+    required: true
+  mingw-extract-path:
+    description: Archive extraction path relative to the build root.
+    required: true
+  runtime-dlls:
+    description: Newline-separated runtime DLLs copied into shared builds.
+    required: false
+    default: ''
+  package-suffix:
+    description: Compiler and flavor suffix used in the package name.
+    required: true
+  github-token:
+    description: Token used to publish the release.
+    required: true
+
+outputs:
+  archive-path:
+    description: Path to the generated Qt archive.
+    value: ${{ steps.package.outputs.archive-path }}
+
+runs:
+  using: composite
+  steps:
+    - name: Setup Python
+      uses: actions/setup-python@v7
+      with:
+        python-version: '3.13'
+        architecture: x64
+
+    - name: Setup build tools
+      shell: pwsh
+      env:
+        MINGW_URL: ${{ inputs.mingw-url }}
+        MINGW_EXTRACT_PATH: ${{ inputs.mingw-extract-path }}
+      run: |
+        $ErrorActionPreference = 'Stop'
+        $root = Split-Path -Parent $env:GITHUB_WORKSPACE
+
+        function Invoke-Download {
+          param([string] $Url, [string] $Destination)
+          curl.exe --fail --location --retry 3 --retry-delay 5 --output $Destination $Url
+          if ($LASTEXITCODE -ne 0) {
+            throw "Failed to download $Url"
+          }
+        }
+
+        $perlArchive = Join-Path $root 'strawberry-perl-64bit-portable.zip'
+        Invoke-Download 'https://github.com/StrawberryPerl/Perl-Dist-Strawberry/releases/download/SP_54231_64bit/strawberry-perl-5.42.3.1-64bit-portable.zip' $perlArchive
+        Expand-Archive -LiteralPath $perlArchive -DestinationPath (Join-Path $root 'Strawberry')
+
+        $mingwArchive = Join-Path $root 'mingw-toolchain.7z'
+        Invoke-Download $env:MINGW_URL $mingwArchive
+        $mingwExtractDir = Join-Path $root $env:MINGW_EXTRACT_PATH
+        New-Item -ItemType Directory -Force -Path $mingwExtractDir | Out-Null
+        7z x $mingwArchive "-o$mingwExtractDir" -y
+        if ($LASTEXITCODE -ne 0) {
+          throw 'Failed to extract MinGW'
+        }
+
+        $ninjaArchive = Join-Path $root 'ninja.zip'
+        Invoke-Download 'https://github.com/ninja-build/ninja/releases/download/v1.13.2/ninja-win.zip' $ninjaArchive
+        Expand-Archive -LiteralPath $ninjaArchive -DestinationPath (Join-Path $root 'ninja')
+
+    - name: Download sources and build Qt
+      shell: pwsh
+      env:
+        QT_VERSION: ${{ inputs.qt-version }}
+        BUILD_TYPE: ${{ inputs.build-type }}
+        FLAVOR: ${{ inputs.flavor }}
+        SCRIPT_PATH: ${{ inputs.script-path }}
+        FULL_SOURCE_URL: ${{ inputs.full-source-url }}
+        MODULE_SOURCE_URL_TEMPLATE: ${{ inputs.module-source-url-template }}
+      run: |
+        $ErrorActionPreference = 'Stop'
+        $root = Split-Path -Parent $env:GITHUB_WORKSPACE
+        $qtRoot = Join-Path $root 'Qt'
+        $sourceRoot = Join-Path $qtRoot $env:QT_VERSION
+        $installRoot = Join-Path $qtRoot "$($env:QT_VERSION)-$($env:BUILD_TYPE)"
+        New-Item -ItemType Directory -Force -Path $sourceRoot, $installRoot | Out-Null
+
+        function Invoke-Download {
+          param([string] $Url, [string] $Destination)
+          curl.exe --fail --location --retry 3 --retry-delay 5 --output $Destination $Url
+          if ($LASTEXITCODE -ne 0) {
+            throw "Failed to download $Url"
+          }
+        }
+
+        $sourceUrls = @()
+        if ($env:FLAVOR -eq 'rp') {
+          $modules = @('qtbase', 'qttools', 'qttranslations', 'qtsvg')
+          $sourceUrls = foreach ($module in $modules) {
+            $env:MODULE_SOURCE_URL_TEMPLATE.Replace('{module}', $module)
+          }
+        }
+        else {
+          $sourceUrls = @($env:FULL_SOURCE_URL)
+        }
+
+        Set-Location $sourceRoot
+        foreach ($url in $sourceUrls) {
+          $fileName = [uri]::UnescapeDataString([io.path]::GetFileName([uri]$url))
+          $archive = Join-Path $sourceRoot $fileName
+          Invoke-Download $url $archive
+          Expand-Archive -LiteralPath $archive -DestinationPath $sourceRoot
+        }
+
+        $buildScript = Join-Path $env:GITHUB_WORKSPACE $env:SCRIPT_PATH
+        if (-not (Test-Path -LiteralPath $buildScript)) {
+          throw "Build script does not exist: $buildScript"
+        }
+
+        cmd.exe /d /s /c "call `"$buildScript`""
+        if ($LASTEXITCODE -ne 0) {
+          throw "Qt build failed with exit code $LASTEXITCODE"
+        }
+
+    - name: Package binaries
+      id: package
+      shell: pwsh
+      env:
+        QT_VERSION: ${{ inputs.qt-version }}
+        BUILD_TYPE: ${{ inputs.build-type }}
+        FLAVOR: ${{ inputs.flavor }}
+        MINGW_PATH: ${{ inputs.mingw-path }}
+        RUNTIME_DLLS: ${{ inputs.runtime-dlls }}
+        PACKAGE_SUFFIX: ${{ inputs.package-suffix }}
+      run: |
+        $ErrorActionPreference = 'Stop'
+        $root = Split-Path -Parent $env:GITHUB_WORKSPACE
+        $compilerBin = Join-Path (Join-Path $root $env:MINGW_PATH) 'bin'
+        $installDir = Join-Path (Join-Path (Join-Path $root 'Qt') "$($env:QT_VERSION)-$($env:BUILD_TYPE)") $env:PACKAGE_SUFFIX
+        $installBin = Join-Path $installDir 'bin'
+
+        if ($env:BUILD_TYPE -eq 'shared') {
+          $runtimeDlls = $env:RUNTIME_DLLS -split '\r?\n' | Where-Object { $_ }
+          foreach ($dll in $runtimeDlls) {
+            $source = Join-Path $compilerBin $dll
+            if (-not (Test-Path -LiteralPath $source)) {
+              throw "Runtime DLL does not exist: $source"
+            }
+            Copy-Item -LiteralPath $source -Destination $installBin
+          }
+        }
+
+        $archive = Join-Path $env:GITHUB_WORKSPACE "Qt_$($env:QT_VERSION)-$($env:BUILD_TYPE)-release_$($env:PACKAGE_SUFFIX).7z"
+        7z a $archive $installDir -mx=9
+        if ($LASTEXITCODE -ne 0) {
+          throw 'Failed to package Qt'
+        }
+
+        "archive-path=$archive" >> $env:GITHUB_OUTPUT
+
+    - name: Publish release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: ${{ inputs.qt-version }}
+        token: ${{ inputs.github-token }}
+        generate_release_notes: false
+        fail_on_unmatched_files: true
+        files: ${{ steps.package.outputs.archive-path }}

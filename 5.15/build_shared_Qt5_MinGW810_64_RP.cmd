@@ -1,5 +1,6 @@
-@chcp 65001
-@cd /d %~dp0
+@setlocal EnableExtensions
+@chcp 65001 >nul || exit /b 1
+@cd /d %~dp0 || exit /b 1
 
 :: 设置Qt版本
 SET QT_VERSION=5.15.19
@@ -32,44 +33,44 @@ SET QMAKE_PATH=%INSTALL_DIR%\bin\qmake.exe
 SET BUILD_DIR="%QT_PATH%\%QT_VERSION%\build-%MinGW_VERSION%"
 
 :: 根据需要进行全新构建
-rmdir /s /q "%BUILD_DIR%"
+if exist %BUILD_DIR%\nul rmdir /s /q %BUILD_DIR% || exit /b 1
 :: 定位到构建目录：
-mkdir "%BUILD_DIR%" && cd /d "%BUILD_DIR%"
+mkdir "%BUILD_DIR%" && cd /d "%BUILD_DIR%" || exit /b 1
 
 ::编译qtbase
-mkdir build-qtbase
-cd build-qtbase
-call %SRC_qtbase%\configure.bat -shared -release -nomake examples -prefix %INSTALL_DIR% -opensource -confirm-license -qt-libpng -qt-libjpeg -qt-zlib -qt-pcre -qt-freetype -schannel -recheck-all -opengl desktop -platform win32-g++
-mingw32-make -j%NUM_THRED%
-mingw32-make install
-cd ..
+mkdir build-qtbase || exit /b 1
+cd build-qtbase || exit /b 1
+call %SRC_qtbase%\configure.bat -shared -release -nomake examples -prefix %INSTALL_DIR% -opensource -confirm-license -qt-libpng -qt-libjpeg -qt-zlib -qt-pcre -qt-freetype -schannel -recheck-all -opengl desktop -platform win32-g++ || exit /b 1
+mingw32-make -j%NUM_THRED% || exit /b 1
+mingw32-make install || exit /b 1
+cd .. || exit /b 1
 
 ::编译qttools
-mkdir build-qttools
-cd build-qttools
-%QMAKE_PATH% %SRC_qttools%\qttools.pro
-mingw32-make -j%NUM_THRED%
-mingw32-make install
-cd ..
+mkdir build-qttools || exit /b 1
+cd build-qttools || exit /b 1
+%QMAKE_PATH% %SRC_qttools%\qttools.pro || exit /b 1
+mingw32-make -j%NUM_THRED% || exit /b 1
+mingw32-make install || exit /b 1
+cd .. || exit /b 1
 
 ::编译qttranslations
-mkdir build-qttranslations
-cd build-qttranslations
-%QMAKE_PATH% %SRC_qttranslations%\qttranslations.pro
-mingw32-make -j%NUM_THRED%
-mingw32-make install
-cd ..
+mkdir build-qttranslations || exit /b 1
+cd build-qttranslations || exit /b 1
+%QMAKE_PATH% %SRC_qttranslations%\qttranslations.pro || exit /b 1
+mingw32-make -j%NUM_THRED% || exit /b 1
+mingw32-make install || exit /b 1
+cd .. || exit /b 1
 
 ::编译qtsvg
-mkdir build-qtsvg
-cd build-qtsvg
-%QMAKE_PATH% %SRC_qtsvg%\qtsvg.pro
-mingw32-make -j%NUM_THRED%
-mingw32-make install
-cd ..
+mkdir build-qtsvg || exit /b 1
+cd build-qtsvg || exit /b 1
+%QMAKE_PATH% %SRC_qtsvg%\qtsvg.pro || exit /b 1
+mingw32-make -j%NUM_THRED% || exit /b 1
+mingw32-make install || exit /b 1
+cd .. || exit /b 1
 
 ::复制qt.conf
-copy %~dp0\qt.conf %INSTALL_DIR%\bin
+copy /Y "%~dp0..\qt.conf" %INSTALL_DIR%\bin || exit /b 1
 
-::@pause
-@cmd /k cd /d %INSTALL_DIR%
+@endlocal
+@exit /b 0

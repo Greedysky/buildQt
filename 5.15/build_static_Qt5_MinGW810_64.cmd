@@ -1,5 +1,6 @@
-@chcp 65001
-@cd /d %~dp0
+@setlocal EnableExtensions
+@chcp 65001 >nul || exit /b 1
+@cd /d %~dp0 || exit /b 1
 
 :: 设置Qt版本
 SET QT_VERSION=5.15.19
@@ -31,19 +32,19 @@ SET INSTALL_DIR="%QT_PATH%\%QT_VERSION%-static\%MinGW_VERSION%"
 SET BUILD_DIR="%QT_PATH%\%QT_VERSION%\build-%MinGW_VERSION%"
 
 :: 根据需要进行全新构建
-rmdir /s /q "%BUILD_DIR%"
+if exist %BUILD_DIR%\nul rmdir /s /q %BUILD_DIR% || exit /b 1
 :: 定位到构建目录：
-mkdir "%BUILD_DIR%" && cd /d "%BUILD_DIR%"
+mkdir "%BUILD_DIR%" && cd /d "%BUILD_DIR%" || exit /b 1
 
 :: configure
-call %SRC_QT%\configure.bat -static -static-runtime -release -prefix %INSTALL_DIR% -nomake examples -nomake tests -skip qtwebengine -opensource -confirm-license -qt-libpng -qt-libjpeg -qt-zlib -qt-pcre -qt-freetype -schannel -opengl desktop -platform win32-g++
+call %SRC_QT%\configure.bat -static -static-runtime -release -prefix %INSTALL_DIR% -nomake examples -nomake tests -skip qtwebengine -opensource -confirm-license -qt-libpng -qt-libjpeg -qt-zlib -qt-pcre -qt-freetype -schannel -opengl desktop -platform win32-g++ || exit /b 1
 
 :: 编译、安装
-mingw32-make -j%NUM_THRED%         
-mingw32-make install
+mingw32-make -j%NUM_THRED% || exit /b 1
+mingw32-make install || exit /b 1
 
 ::复制qt.conf
-copy %~dp0\qt.conf %INSTALL_DIR%\bin
+copy /Y "%~dp0..\qt.conf" %INSTALL_DIR%\bin || exit /b 1
 
-::@pause
-@cmd /k cd /d %INSTALL_DIR%
+@endlocal
+@exit /b 0

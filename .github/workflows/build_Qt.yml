@@ -1,0 +1,168 @@
+name: build_Qt_LTS
+run-name: build_Qt_${{ inputs.qt-version }}_LTS
+
+on:
+  workflow_dispatch:
+    inputs:
+      qt-version:
+        description: Qt version
+        required: true
+        type: choice
+        default: 6.12.1
+        options:
+          - 5.15.19
+          - 6.2.13
+          - 6.5.11
+          - 6.8.5
+          - 6.12.1
+
+jobs:
+  config:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.config.outputs.matrix }}
+    steps:
+      - name: Resolve build configuration
+        id: config
+        shell: pwsh
+        env:
+          QT_VERSION: ${{ github.event.inputs.qt-version }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+
+          $versions = @{
+            '5.15.19' = @{
+              Main = '5.15'; Major = '5'; SourceRoot = ''; SourceSuffix = '-opensource-src'
+            }
+            '6.2.13' = @{
+              Main = '6.2'; Major = '6'; SourceRoot = 'src'; SourceSuffix = '-opensource-src'
+            }
+            '6.5.11' = @{
+              Main = '6.5'; Major = '6'; SourceRoot = 'src'; SourceSuffix = '-opensource-src'
+            }
+            '6.8.5' = @{
+              Main = '6.8'; Major = '6'; SourceRoot = ''; SourceSuffix = '-opensource-src'
+            }
+            '6.12.1' = @{
+              Main = '6.12'; Major = '6'; SourceRoot = ''; SourceSuffix = '-src'
+            }
+          }
+
+          if (-not $versions.Contains($env:QT_VERSION)) {
+            throw "Unsupported Qt version: $($env:QT_VERSION)"
+          }
+          $version = $versions[$env:QT_VERSION]
+          $architectures = if ($version.Major -eq '5') { @('x86', 'x64') } else { @('x64') }
+
+          $baseSourceUrl = "https://download.qt.io/archive/qt/$($version.Main)/$($env:QT_VERSION)"
+          $sourceRoot = if ([string]::IsNullOrEmpty($version.SourceRoot)) { '' } else { "$($version.SourceRoot)/" }
+          $fullSourceUrl = "$baseSourceUrl/$($sourceRoot)single/qt-everywhere$($version.SourceSuffix)-$($env:QT_VERSION).zip"
+          $moduleSourceUrlTemplate = "$baseSourceUrl/$($sourceRoot)submodules/{module}-everywhere$($version.SourceSuffix)-$($env:QT_VERSION).zip"
+
+          $targets = @()
+          foreach ($architecture in $architectures) {
+            if ($version.Major -eq '5') {
+              $compilerUrlRoot = 'https://download.qt.io/online/qtsdkrepository/windows_x86/desktop/tools_mingw81'
+              if ($architecture -eq 'x86') {
+                $compiler = 'MinGW810_32'
+                $compilerName = 'mingw810_32'
+                $compilerPath = 'mingw32'
+                $compilerExtractPath = 'mingw32'
+                $libgccDll = 'libgcc_s_dw2-1.dll'
+                $compilerUrl = "$compilerUrlRoot/qt.tools.win32_mingw810/8.1.0-1-202411201005i686-8.1.0-gdb-11.2.0-release-posix-dwarf-rt_v6-rev0.7z"
+              }
+              else {
+                $compiler = 'MinGW810_64'
+                $compilerName = 'mingw810_64'
+                $compilerPath = 'mingw64'
+                $compilerExtractPath = 'mingw64'
+                $libgccDll = 'libgcc_s_seh-1.dll'
+                $compilerUrl = "$compilerUrlRoot/qt.tools.win64_mingw810/8.1.0-1-202411201005x86_64-8.1.0-gdb-11.2.0-release-posix-seh-rt_v6-rev0.7z"
+              }
+            }
+            elseif ($env:QT_VERSION -in @('6.2.13', '6.5.11')) {
+              $compiler = 'MinGW1120_64'
+              $compilerName = 'mingw1120_64'
+              $compilerPath = 'Tools/mingw1120_64'
+              $compilerExtractPath = '.'
+              $libgccDll = 'libgcc_s_seh-1.dll'
+              $compilerUrl = 'https://download.qt.io/online/qtsdkrepository/windows_x86/desktop/tools_mingw90/qt.tools.win64_mingw900/9.0.0-1-202203221220mingw-w64-x86_64-11.2.0-release-posix-seh-rt_v9-rev3.7z'
+            }
+            elseif ($env:QT_VERSION -eq '6.8.5') {
+              $compiler = 'MinGW1310_64'
+              $compilerName = 'mingw1310_64'
+              $compilerPath = 'Tools/mingw1310_64'
+              $compilerExtractPath = '.'
+              $libgccDll = 'libgcc_s_seh-1.dll'
+              $compilerUrl = 'https://download.qt.io/online/qtsdkrepository/windows_x86/desktop/tools_mingw1310/qt.tools.win64_mingw1310/13.1.0-202407240918mingw1310.7z'
+            }
+            else {
+              $compiler = 'MinGW1510_64'
+              $compilerName = 'mingw1510_64'
+              $compilerPath = 'Tools/mingw1510_64'
+              $compilerExtractPath = 'Tools/mingw1510_64'
+              $libgccDll = 'libgcc_s_seh-1.dll'
+              $compilerUrl = 'https://download.qt.io/online/qtsdkrepository/windows_x86/desktop/tools_mingw1510/qt.tools.win64_mingw1510/15.1.0-202610271023mingw1510.7z'
+            }
+
+            foreach ($linkMode in @('shared', 'static')) {
+              foreach ($flavor in @('full', 'rp')) {
+                $flavorSuffix = if ($flavor -eq 'rp') { '_RP' } else { '' }
+                $scriptPath = "$($version.Main)/build_${linkMode}_Qt$($version.Major)_$compiler$flavorSuffix.cmd"
+                $packageSuffix = "$compilerName$flavorSuffix"
+                $runtimeDlls = if ($linkMode -eq 'shared') {
+                  "libstdc++-6.dll`n$libgccDll`nlibwinpthread-1.dll"
+                }
+                else {
+                  ''
+                }
+
+                $targets += [pscustomobject]@{
+                'qt-version' = $env:QT_VERSION
+                'qt-major' = $version.Major
+                'build-type' = $linkMode
+                'flavor' = $flavor
+                'script-path' = $scriptPath
+                'full-source-url' = $fullSourceUrl
+                'module-source-url-template' = $moduleSourceUrlTemplate
+                'mingw-url' = $compilerUrl
+                'mingw-path' = $compilerPath
+                'mingw-extract-path' = $compilerExtractPath
+                'runtime-dlls' = $runtimeDlls
+                'package-suffix' = $packageSuffix
+              }
+              }
+            }
+          }
+
+          $matrix = @{
+            include = $targets
+          }
+          "matrix=$($matrix | ConvertTo-Json -Depth 5 -Compress)" >> $env:GITHUB_OUTPUT
+
+  build:
+    needs: config
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.config.outputs.matrix) }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Build selected Qt target
+        uses: ./.github/actions/build-qt
+        with:
+          qt-version: ${{ matrix.qt-version }}
+          qt-major: ${{ matrix.qt-major }}
+          build-type: ${{ matrix.build-type }}
+          flavor: ${{ matrix.flavor }}
+          script-path: ${{ matrix.script-path }}
+          full-source-url: ${{ matrix.full-source-url }}
+          module-source-url-template: ${{ matrix.module-source-url-template }}
+          mingw-url: ${{ matrix.mingw-url }}
+          mingw-path: ${{ matrix.mingw-path }}
+          mingw-extract-path: ${{ matrix.mingw-extract-path }}
+          runtime-dlls: ${{ matrix.runtime-dlls }}
+          package-suffix: ${{ matrix.package-suffix }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
