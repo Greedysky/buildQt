@@ -20,15 +20,16 @@ set "STATIC_RUNTIME="
 if /i "%LINK_MODE%"=="static" set "STATIC_RUNTIME=-static-runtime"
 
 if /i "%ARCHITECTURE%"=="x86" (
-    set "ARCH_SUFFIX=32"
-    set "MINGW_DIR=mingw32"
+    set "MINGW_DIR=mingw810_32"
 ) else (
-    set "ARCH_SUFFIX=64"
-    set "MINGW_DIR=mingw64"
+    set "MINGW_DIR=mingw810_64"
 )
-set "MinGW_VERSION=mingw810_%ARCH_SUFFIX%%FLAVOR_SUFFIX%"
+set "MinGW_VERSION=%MINGW_DIR%%FLAVOR_SUFFIX%"
+set "MINGW_BIN=D:\a\buildQt\Tools\%MINGW_DIR%\bin"
 
-set "PATH=D:\a\buildQt\%MINGW_DIR%\bin;D:\a\buildQt\Strawberry\c\bin;D:\a\buildQt\Strawberry\perl\site\bin;D:\a\buildQt\Strawberry\perl\bin;%PATH%"
+set "PATH=%MINGW_BIN%;D:\a\buildQt\Strawberry\c\bin;D:\a\buildQt\Strawberry\perl\site\bin;D:\a\buildQt\Strawberry\perl\bin;%PATH%"
+set "CC=%MINGW_BIN%\gcc.exe"
+set "CXX=%MINGW_BIN%\g++.exe"
 set "QT_PATH=D:\a\buildQt\Qt"
 set "SRC_ROOT=%QT_PATH%\%QT_VERSION%"
 set "INSTALL_DIR=%QT_PATH%\%QT_VERSION%-%LINK_MODE%\%MinGW_VERSION%"

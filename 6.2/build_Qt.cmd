@@ -15,15 +15,19 @@ if /i not "%LINK_MODE%"=="shared" if /i not "%LINK_MODE%"=="static" goto :usage
 if /i not "%FLAVOR%"=="full" if /i not "%FLAVOR%"=="rp" goto :usage
 
 set "QT_VERSION=6.2.13"
-set "MinGW_VERSION=mingw1120_64"
 set "FLAVOR_SUFFIX="
 if /i "%FLAVOR%"=="rp" set "FLAVOR_SUFFIX=_RP"
-set "MinGW_VERSION=%MinGW_VERSION%%FLAVOR_SUFFIX%"
 set "STATIC_RUNTIME="
 if /i "%LINK_MODE%"=="static" set "STATIC_RUNTIME=-static-runtime"
 set "EXTRA_CONFIGURE_OPTIONS=-no-feature-quick3d-assimp"
 
-set "PATH=D:\a\buildQt\Tools\%MinGW_VERSION%\bin;D:\a\buildQt\ninja;D:\a\buildQt\Strawberry\c\bin;D:\a\buildQt\Strawberry\perl\site\bin;D:\a\buildQt\Strawberry\perl\bin;%PATH%"
+set "MINGW_DIR=mingw1120_64"
+set "MinGW_VERSION=%MINGW_DIR%%FLAVOR_SUFFIX%"
+set "MINGW_BIN=D:\a\buildQt\Tools\%MINGW_DIR%\bin"
+
+set "PATH=%MINGW_BIN%;D:\a\buildQt\Strawberry\c\bin;D:\a\buildQt\Strawberry\perl\site\bin;D:\a\buildQt\Strawberry\perl\bin;%PATH%"
+set "CC=%MINGW_BIN%\gcc.exe"
+set "CXX=%MINGW_BIN%\g++.exe"
 set "QT_PATH=D:\a\buildQt\Qt"
 set "SRC_ROOT=%QT_PATH%\%QT_VERSION%"
 set "INSTALL_DIR=%QT_PATH%\%QT_VERSION%-%LINK_MODE%\%MinGW_VERSION%"
