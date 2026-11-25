@@ -4,7 +4,7 @@
 1. 本项目的主要目的是从源代码构建Qt的二进制版本(使用GithubActions自动构建)
 2. 主要针对开源版本的Qt版本
 3. 主要构建`Windows版本`(使用`MinGW64`编译器)
-4. 在GitHub Actions页面手动运行`build_Qt`工作流，选择一个Qt版本后只会构建该版本对应架构的四个产物(`shared/full`、`shared/RP`、`static/full`、`static/RP`)；Qt 5.15会同时构建x86和x64
+4. 在GitHub Actions页面手动运行`build_Qt_LTS`工作流，选择一个Qt版本后只会构建该版本对应产物(`shared/full`、`shared/RP`、`static/full`、`static/RP`)
 
 ## 版本
 1. 无"RP"版本：从Qt完整源代码构建，构建绝大部分组件

@@ -14,6 +14,9 @@ inputs:
   flavor:
     description: full or rp.
     required: true
+  architecture:
+    description: x86 or x64.
+    required: true
   script-path:
     description: Repository-relative path to the build script.
     required: true
@@ -97,6 +100,7 @@ runs:
         QT_VERSION: ${{ inputs.qt-version }}
         BUILD_TYPE: ${{ inputs.build-type }}
         FLAVOR: ${{ inputs.flavor }}
+        ARCHITECTURE: ${{ inputs.architecture }}
         SCRIPT_PATH: ${{ inputs.script-path }}
         FULL_SOURCE_URL: ${{ inputs.full-source-url }}
         MODULE_SOURCE_URL_TEMPLATE: ${{ inputs.module-source-url-template }}
@@ -140,7 +144,8 @@ runs:
           throw "Build script does not exist: $buildScript"
         }
 
-        cmd.exe /d /s /c "call `"$buildScript`""
+        $scriptArguments = "$($env:BUILD_TYPE) $($env:FLAVOR) $($env:ARCHITECTURE)"
+        cmd.exe /d /s /c "call `"$buildScript`" $scriptArguments"
         if ($LASTEXITCODE -ne 0) {
           throw "Qt build failed with exit code $LASTEXITCODE"
         }

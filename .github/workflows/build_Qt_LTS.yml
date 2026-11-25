@@ -51,6 +51,7 @@ jobs:
           if (-not $versions.Contains($env:QT_VERSION)) {
             throw "Unsupported Qt version: $($env:QT_VERSION)"
           }
+
           $version = $versions[$env:QT_VERSION]
           $architectures = if ($version.Major -eq '5') { @('x86', 'x64') } else { @('x64') }
 
@@ -108,7 +109,7 @@ jobs:
             foreach ($linkMode in @('shared', 'static')) {
               foreach ($flavor in @('full', 'rp')) {
                 $flavorSuffix = if ($flavor -eq 'rp') { '_RP' } else { '' }
-                $scriptPath = "$($version.Main)/build_${linkMode}_Qt$($version.Major)_$compiler$flavorSuffix.cmd"
+                $scriptPath = "$($version.Main)/build_Qt.cmd"
                 $packageSuffix = "$compilerName$flavorSuffix"
                 $runtimeDlls = if ($linkMode -eq 'shared') {
                   "libstdc++-6.dll`n$libgccDll`nlibwinpthread-1.dll"
@@ -122,6 +123,7 @@ jobs:
                 'qt-major' = $version.Major
                 'build-type' = $linkMode
                 'flavor' = $flavor
+                'architecture' = $architecture
                 'script-path' = $scriptPath
                 'full-source-url' = $fullSourceUrl
                 'module-source-url-template' = $moduleSourceUrlTemplate
@@ -157,6 +159,7 @@ jobs:
           qt-major: ${{ matrix.qt-major }}
           build-type: ${{ matrix.build-type }}
           flavor: ${{ matrix.flavor }}
+          architecture: ${{ matrix.architecture }}
           script-path: ${{ matrix.script-path }}
           full-source-url: ${{ matrix.full-source-url }}
           module-source-url-template: ${{ matrix.module-source-url-template }}
