@@ -67,16 +67,16 @@ jobs:
               if ($architecture -eq 'x86') {
                 $compiler = 'MinGW810_32'
                 $compilerName = 'mingw810_32'
-                $compilerPath = 'mingw32'
-                $compilerExtractPath = 'mingw32'
+                $compilerPath = 'Tools/mingw810_32'
+                $compilerExtractPath = 'Tools/mingw810_32'
                 $libgccDll = 'libgcc_s_dw2-1.dll'
                 $compilerUrl = "$compilerUrlRoot/qt.tools.win32_mingw810/8.1.0-1-202411201005i686-8.1.0-gdb-11.2.0-release-posix-dwarf-rt_v6-rev0.7z"
               }
               else {
                 $compiler = 'MinGW810_64'
                 $compilerName = 'mingw810_64'
-                $compilerPath = 'mingw64'
-                $compilerExtractPath = 'mingw64'
+                $compilerPath = 'Tools/mingw810_64'
+                $compilerExtractPath = 'Tools/mingw810_64'
                 $libgccDll = 'libgcc_s_seh-1.dll'
                 $compilerUrl = "$compilerUrlRoot/qt.tools.win64_mingw810/8.1.0-1-202411201005x86_64-8.1.0-gdb-11.2.0-release-posix-seh-rt_v6-rev0.7z"
               }
